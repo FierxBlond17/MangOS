@@ -52,6 +52,9 @@ Desde la raíz del proyecto (MangOS/), ejecutá:
 
 docker compose up -d --build
 
+Si te da algun error de permisos podes ingresar como sudo o modificar los permisos con:
+
+sudo usermod -aG docker $USER
 
 Esto:
 
