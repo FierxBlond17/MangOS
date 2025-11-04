@@ -7,6 +7,9 @@ RUN docker-php-ext-install mysqli pdo pdo_mysql
 # Activamos mod_rewrite (útil para frameworks propios)
 RUN a2enmod rewrite
 
+COPY apache.conf /etc/apache2/conf-enabled/mangos.conf
+
+
 # Definimos el directorio de trabajo
 WORKDIR /var/www/html
 
