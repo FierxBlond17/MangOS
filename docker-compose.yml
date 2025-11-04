@@ -7,7 +7,7 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - .:/var/www/html
+      - ./mini-framework:/var/www/html
     depends_on:
       - db
     networks:
