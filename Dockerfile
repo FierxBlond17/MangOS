@@ -1,21 +1,35 @@
-# Imagen base con Apache y PHP
 FROM php:8.2-apache
 
-# Instalamos extensiones necesarias para conectar con MariaDB
-RUN docker-php-ext-install mysqli pdo pdo_mysql
+# Instalar extensiones y herramientas
+RUN apt-get update && apt-get install -y \
+    libzip-dev \
+    zip \
+    unzip \
+    curl \
+    git \
+    netcat-openbsd \
+    && docker-php-ext-install mysqli pdo pdo_mysql \
+    && a2enmod rewrite
 
-# Activamos mod_rewrite (útil para frameworks propios)
-RUN a2enmod rewrite
+# Definir directorio de trabajo
+WORKDIR /var/www
 
-COPY apache.conf /etc/apache2/conf-enabled/mangos.conf
+# Copiar proyecto
+COPY ./mini-framework /var/www
 
+# Copiar script para esperar DB
+COPY wait-for-db.sh /usr/local/bin/wait-for-db.sh
+RUN chmod +x /usr/local/bin/wait-for-db.sh
 
-# Definimos el directorio de trabajo
-WORKDIR /var/www/html
+# Ajustar permisos
+RUN chown -R www-data:www-data /var/www
 
-# Damos permisos adecuados al proyecto
-RUN chown -R www-data:www-data /var/www/html
+# Configurar Apache para servir "public"
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/public|g' /etc/apache2/sites-available/000-default.conf
 
-# Exponemos el puerto 80
-EXPOSE 80
+# Instalar Composer dentro del contenedor y dependencias
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN composer install --working-dir=/var/www
 
+# Comando por defecto
+CMD ["/usr/local/bin/wait-for-db.sh", "db", "3306", "--", "/usr/sbin/apache2ctl", "-D", "FOREGROUND"]

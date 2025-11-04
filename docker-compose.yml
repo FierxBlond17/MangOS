@@ -5,13 +5,14 @@ services:
     build: .
     container_name: mangos_app
     ports:
-      - "8080:80"
+      - "8090:80"
     volumes:
-      - ./mini-framework:/var/www/html
+      - ./mini-framework:/var/www
     depends_on:
       - db
     networks:
       - mangos_net
+    command: /usr/local/bin/wait-for-db.sh db 3306 -- /usr/sbin/apache2ctl -D FOREGROUND
 
   db:
     image: mariadb:11
@@ -24,6 +25,7 @@ services:
       MYSQL_PASSWORD: 12345678
     volumes:
       - db_data:/var/lib/mysql
+      - ./proyutu.sql:/docker-entrypoint-initdb.d/proyutu.sql
     networks:
       - mangos_net
 
